@@ -120,7 +120,7 @@
     const labels = ["Cansado 😫", "Medio 😐", "Descansado 😌"];
 
     async function cargarModelo() {
-      modelo = await tf.loadGraphModel('model_js/model.json');
+      modelo = await tf.loadGraphModel('folder/model.json');
       console.log("✅ Modelo cargado correctamente.");
     }
 
@@ -165,3 +165,4 @@
   </script>
 </body>
 </html>
+
