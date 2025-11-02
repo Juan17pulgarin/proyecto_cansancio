@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Predicción del Nivel de Cansancio 💤</title>
 
-  <!-- TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 
-  <!-- Estilos -->
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -120,7 +118,7 @@
     const labels = ["Cansado 😫", "Medio 😐", "Descansado 😌"];
 
     async function cargarModelo() {
-      modelo = await tf.loadGraphModel('folder/model.json');
+      modelo = await tf.loadGraphModel('docs/folder/model.json');
       console.log("✅ Modelo cargado correctamente.");
     }
 
@@ -165,4 +163,5 @@
   </script>
 </body>
 </html>
+
 
