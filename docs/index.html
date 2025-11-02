@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predicción del Nivel de Cansancio 💤</title>
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+
+  <!-- Estilos -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #c3e0ff, #f5faff);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      color: #0077ff;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      width: 320px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 20px;
+      background: #0077ff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #005fcc;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+
+    .barra-container {
+      margin-top: 15px;
+      width: 100%;
+      height: 20px;
+      border-radius: 10px;
+      background: #eee;
+      overflow: hidden;
+    }
+
+    .barra {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4d4d, #ffcc00, #4caf50);
+      transition: width 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔋 Predicción del Nivel de Cansancio</h1>
+
+  <div class="card">
+    <label>😴 Horas de sueño:</label>
+    <input type="number" id="sueno" min="0" max="12" step="0.1" value="7">
+
+    <label>💼 Horas de trabajo:</label>
+    <input type="number" id="trabajo" min="0" max="16" step="0.1" value="8">
+
+    <label>🏃 Minutos de ejercicio:</label>
+    <input type="number" id="ejercicio" min="0" max="180" step="1" value="30">
+
+    <button onclick="predecir()">Predecir Cansancio</button>
+
+    <div id="resultado">---</div>
+    <div class="barra-container"><div id="barra" class="barra"></div></div>
+  </div>
+
+  <script>
+    let modelo;
+    const labels = ["Cansado 😫", "Medio 😐", "Descansado 😌"];
+
+    async function cargarModelo() {
+      modelo = await tf.loadGraphModel('model_js/model.json');
+      console.log("✅ Modelo cargado correctamente.");
+    }
+
+    async function predecir() {
+      if (!modelo) {
+        alert("El modelo aún se está cargando...");
+        return;
+      }
+
+      const sueno = parseFloat(document.getElementById("sueno").value);
+      const trabajo = parseFloat(document.getElementById("trabajo").value);
+      const ejercicio = parseFloat(document.getElementById("ejercicio").value);
+
+      const mean = [6, 8, 45];     
+      const std = [1.7, 2, 25];    
+      const input = [(sueno - mean[0]) / std[0],
+                     (trabajo - mean[1]) / std[1],
+                     (ejercicio - mean[2]) / std[2]];
+
+      const tensor = tf.tensor2d([input]);
+      const prediccion = modelo.predict(tensor);
+      const index = prediccion.argMax(1).dataSync()[0];
+      const prob = prediccion.dataSync()[index];
+
+      const resultado = document.getElementById("resultado");
+      const barra = document.getElementById("barra");
+
+      resultado.innerHTML = `${labels[index]}<br><small>Confianza: ${(prob*100).toFixed(1)}%</small>`;
+
+      let ancho = 0;
+      let color = "#ccc";
+
+      if (index === 0) { ancho = 33; color = "#ff4d4d"; }
+      else if (index === 1) { ancho = 66; color = "#ffcc00"; }
+      else { ancho = 100; color = "#4caf50"; }
+
+      barra.style.width = ancho + "%";
+      barra.style.background = color;
+    }
+
+    cargarModelo();
+  </script>
+</body>
+</html>
